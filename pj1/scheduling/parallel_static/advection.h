@@ -48,7 +48,6 @@ public:
 	}
 	//run simulation and store results every 1000 timesteps
 	void run(string file){
-		std::ofstream of(file);
 		for(auto t=0; t<NT; ++t){
 			#pragma omp parallel for default(none) schedule(static)
 			for(auto i=0; i<N; ++i){
@@ -56,18 +55,8 @@ public:
 					next_mx[i][j] = update_value(i, j);
 				}
 			}
-			//write
-			if(t%(NT/20) == 0){
-				std::cout << "writing " << t/(NT/20) + 1 <<"th frame" << std::endl;
-				for(auto vec: curr_mx){
-					std::copy(vec.begin(), vec.end(),
-						std::ostream_iterator<double>(of, "\t"));
-					of << std::endl;
-				}
-			}
 			std::swap(curr_mx, next_mx);
 		}
-		of.close();
 	}
 
 private:

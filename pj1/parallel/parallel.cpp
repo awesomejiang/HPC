@@ -30,20 +30,21 @@ void print_args(char **argv){
 	400 20000 1.0 1.0e6 5.0e-7 2.95e-7 4
 */
 int main(int argc, char **argv){
-	int t1 = omp_get_wtime();
+	double t1 = omp_get_wtime();
 	int N = atoi(argv[1]), NT = atoi(argv[2]),
 		thread = atoi(argv[7]);
 	double L = atof(argv[3]), T = atof(argv[4]),
 		 u = atof(argv[5]), v = atof(argv[6]);
 
-	print_args(argv);
 
 	omp_set_num_threads(thread);
 	Advection ad{N ,NT, L, T, u, v};
 	ad.init_gaussian(L/4, L/4);
+	print_args(argv);
+
 	ad.run("parallel.out");
 
-	int t2 = omp_get_wtime();
+	double t2 = omp_get_wtime();
 	cout << "Parallel running time:\t" << t2-t1 << " s" << endl;
 	return 0;
 }
