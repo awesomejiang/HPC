@@ -5,6 +5,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --exclusive
+#SBATCH --output=non_blocking_1.out
 
 module load openmpi/2.0.1+gcc-6.1
 

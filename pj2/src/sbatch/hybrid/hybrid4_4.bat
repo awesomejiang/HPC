@@ -5,6 +5,7 @@
 #SBATCH --ntasks-per-node=4
 #SBATCH --cpus-per-task=4
 #SBATCH --exclusive
+#SBATCH --output=hybrid4_4.out
 
 module load openmpi/2.0.1+gcc-6.1
 
