@@ -47,7 +47,7 @@ Advection_mpi_blocking::run(std::string file){
 		if(t%(NT/20) == 0){
 			MPI_File fh;
 			MPI_Offset offset;
-			MPI_File_open(MPI_COMM_WORLD, file.c_str(), 
+			MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(file.c_str()),
 				MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
 			for(auto l=0; l<N; ++l){
 				offset = sizeof(double)*(t/(NT/20)*N*k*N*k + (mype/k*N+l)*N*k + mype%k*N);
