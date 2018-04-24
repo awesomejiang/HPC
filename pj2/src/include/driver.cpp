@@ -84,7 +84,7 @@ void Driver::threads(){
 void Driver::mpi_blocking(){
 	//check if thread == 1
 	if(thread != 1)
-		throw std::runtime_error("Thread has to be 1 in mpi version.");
+		throw runtime_error("Thread has to be 1 in mpi version.");
 
 	//create/clear output file before mpi init
 	std::ofstream f("mpi_blocking.out", std::ofstream::trunc);
@@ -101,9 +101,9 @@ void Driver::mpi_blocking(){
 
 	int k = std::sqrt(nprocs);
 	if(k*k != nprocs) // check if rank is sqare number
-		throw std::runtime_error("Mpi rank has to be sqare number.");
+		throw runtime_error("Mpi rank has to be sqare number.");
 	else if(N%k != 0)
-		throw std::runtime_error("N cannot be divided by sqrt of rank.");
+		throw runtime_error("N cannot be divided by sqrt of rank.");
 
 	stat = MPI_Comm_rank(MPI_COMM_WORLD, &mype); /* my integer proc id */
 	if(stat != MPI_SUCCESS)
@@ -132,7 +132,7 @@ void Driver::mpi_blocking(){
 void Driver::mpi_non_blocking(){
 	//check if thread == 1
 	if(thread != 1)
-		throw std::runtime_error("Thread has to be 1 in mpi version.");
+		throw runtime_error("Thread has to be 1 in mpi version.");
 
 	//create/clear output file before mpi init
 	std::ofstream f("mpi_non_blocking.out", std::ofstream::trunc);
@@ -149,9 +149,9 @@ void Driver::mpi_non_blocking(){
 
 	int k = std::sqrt(nprocs);
 	if(k*k != nprocs) // check if rank is sqare number
-		throw std::runtime_error("Mpi rank has to be sqare number.");
+		throw runtime_error("Mpi rank has to be sqare number.");
 	else if(N%k != 0)
-		throw std::runtime_error("N cannot be divided by sqrt of rank.");
+		throw runtime_error("N cannot be divided by sqrt of rank.");
 
 	stat = MPI_Comm_rank(MPI_COMM_WORLD, &mype); /* my integer proc id */
 	if(stat != MPI_SUCCESS)
@@ -196,9 +196,9 @@ void Driver::hybrid(){
 
 	int k = std::sqrt(nprocs);
 	if(k*k != nprocs) // check if rank is sqare number
-		throw std::runtime_error("Mpi rank has to be sqare number.");
+		throw runtime_error("Mpi rank has to be sqare number.");
 	else if(N%k != 0)
-		throw std::runtime_error("N cannot be divided by sqrt of rank.");
+		throw runtime_error("N cannot be divided by sqrt of rank.");
 
 	stat = MPI_Comm_rank(MPI_COMM_WORLD, &mype); /* my integer proc id */
 	if(stat != MPI_SUCCESS)
