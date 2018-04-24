@@ -51,6 +51,7 @@ public:
 	}
 	//run simulation and store results every 1000 timesteps
 	void run(string file){
+		std::ofstream of(file);
 		for(auto t=0; t<NT; ++t){
 			#pragma omp parallel for default(none)
 			for(auto i=0; i<N; ++i){
