@@ -21,7 +21,7 @@ sync(){
 		[](auto l){return l.back();});
 	//cal destinations
 	int up = (mype-k+k*k)%(k*k), down = (mype+k)%(k*k),
-		left = mype/k*k+(mype+3)%k, right = mype/k*k+(mype+1)%k;
+		left = mype/k*k+(mype+k-1)%k, right = mype/k*k+(mype+1)%k;
 	//send msg
 	MPI_Isend(u_ghost.data(), N, MPI_DOUBLE, up, 0, MPI_COMM_WORLD, &r);
 	MPI_Isend(r_ghost.data(), N, MPI_DOUBLE, right, 1, MPI_COMM_WORLD, &r);

@@ -35,7 +35,7 @@ void Driver::run(){
 	else if(mode == "mpi_blocking") mpi_blocking();
 	else if(mode == "mpi_non_blocking") mpi_non_blocking();
 	else if(mode == "hybrid") hybrid();
-	else throw runtime_error("");
+	else throw runtime_error("Unrecognized running mode.");
 }
 
 

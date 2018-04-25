@@ -107,7 +107,7 @@ void Advection_mpi_blocking::sync_left(){
 	line<double> buf;
 	std::transform(curr_mx.begin(), curr_mx.end(), std::back_inserter(buf),
 		[](auto l){return l.front();});
-	int left = mype/k*k+(mype+3)%k, right = mype/k*k+(mype+1)%k;
+	int left = mype/k*k+(mype+k-1)%k, right = mype/k*k+(mype+1)%k;
 	if(mype%k == 0){
 		MPI_Send(buf.data(), N, MPI_DOUBLE, left, 0, MPI_COMM_WORLD);
 		MPI_Recv(ghost_cells[1].data(), N, MPI_DOUBLE, right, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -122,7 +122,7 @@ void Advection_mpi_blocking::sync_right(){
 	line<double> buf;
 	std::transform(curr_mx.begin(), curr_mx.end(), std::back_inserter(buf),
 		[](auto l){return l.back();});
-	int left = mype/k*k+(mype+3)%k, right = mype/k*k+(mype+1)%k;
+	int left = mype/k*k+(mype+k-1)%k, right = mype/k*k+(mype+1)%k;
 	if(mype%k == 0){
 		MPI_Send(buf.data(), N, MPI_DOUBLE, right, 0, MPI_COMM_WORLD);
 		MPI_Recv(ghost_cells[3].data(), N, MPI_DOUBLE, left, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
