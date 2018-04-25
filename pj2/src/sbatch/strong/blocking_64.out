@@ -1,11 +1,1 @@
-slurmstepd-midway357: error: *** JOB 45384813 ON midway357 CANCELLED AT 2018-04-24T20:05:28 DUE TO TIME LIMIT ***
---------------------------------------------------------------------------
-ORTE has lost communication with its daemon located on node:
-
-  hostname:  midway358
-
-This is usually due to either a failure of the TCP network
-connection to the node, or possibly an internal failure of
-the daemon itself. We cannot recover from this failure, and
-therefore will terminate the job.
---------------------------------------------------------------------------
+Running time: 2764 ms
