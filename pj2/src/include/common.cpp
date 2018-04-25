@@ -17,6 +17,7 @@ Advection_common::Advection_common(int N, int NT, double L, double T, double u, 
 	curr_mx{matrix<double>(N, line<double>(N, 0.0))},
 	next_mx{matrix<double>(N, line<double>(N, 0.0))} {}
 
+
 double Advection_common::update_value(int i, int j){
 	//periodic conditions
 	double up = curr_mx[(i-1+N)%N][j],

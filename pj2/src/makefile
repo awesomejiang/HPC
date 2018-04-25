@@ -2,7 +2,7 @@ SRCS = $(patsubst include/%.cpp, %, $(wildcard include/*.cpp))
 OBJS = $(patsubst %, %.o, $(SRCS))
 
 
-CXX = mpic++ -fopenmp -std=c++14
+CXX = mpic++ -fopenmp -std=c++14 -O3
 
 all: $(SRCS) main
 	

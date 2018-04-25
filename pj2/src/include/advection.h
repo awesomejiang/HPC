@@ -24,7 +24,7 @@ public:
 	virtual void init_gaussian(double sig_x, double sig_y, double x0, double y0) = 0;
 	virtual void run() = 0;
 	virtual void run(std::string file) = 0;
-	virtual double update_value(int i, int j);
+	double update_value(int i, int j);
 };
 
 class Advection_serial: public Advection_common {
@@ -53,8 +53,8 @@ public:
 
 	int mype, k;
 	std::vector<std::vector<double>> ghost_cells; //0,1,2,3->up, right, down, left
-	double update_value(int i, int j) override;
-	virtual void sync();
+	double update_value(int i, int j);
+	void sync();
 
 private:
 	void sync_up();
@@ -66,7 +66,7 @@ private:
 class Advection_mpi_non_blocking: public Advection_mpi_blocking {
 public: 
 	Advection_mpi_non_blocking(int N, int NT, double L, double T, double u, double v, int mype, int k);
-	void sync() override;
+	void sync();
 };
 
 class Advection_hybrid: public Advection_mpi_blocking {
