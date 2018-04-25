@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
 	anim = FuncAnimation(fig, update, frames=np.arange(0,20), interval=100)
 
-	if(len(sys.argv)==4 and sys.argv[3]=="save"):
+	if(len(sys.argv)==3 and sys.argv[2]=="save"):
 		gif = filename.split('.')[0]+'.gif'
 		anim.save(gif, writer='imagemagick')
 	else:

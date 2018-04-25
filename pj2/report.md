@@ -1,24 +1,45 @@
-# 1. Example ploting
-Running args: ./serial 400 20000 1.0 1.0e6 5.0e-7 2.95e-7       
-View animation in fig folder(./fig/serial.gif)      
+# 1. Ploting
+# 1.1. Run code and compare
+Run 2 commands:     
 
-![gif](./fig/serial.gif)
+    mpirun -n 1 ./main 2000 400 1.0 1.0e3 5.0e-7 2.85e-7 1 serial
+    mpirun -n 16 ./main 2000 400 1.0 1.0e3 5.0e-7 2.85e-7 1 mpi_blocking
 
-# 2. OpenMP Thread Scheduler Performance
-Running args: ./parallel 3200 2000 1.0 1.0e3 5.0e-7 2.95e-7 4       
+And compare 2 output files:
+    
+    python compare.py 
 
-Scheduler | guided | dynamic | static(default size= 800) | static,10 | static,50
---- | --- | --- | --- | --- | ---
-RunningTime/s| 252.9 | 255.2 | 255.2 | 257.0 | 257.9
+It returns '0', which means all values in 2 matrice are equal.      
+P.S. Due to the precision, values are not 'identical' but have an error around 10^-15 to 10^-17. My compare script will count if error is larger than 10^-10.
 
-Generally, guided mode is faster than dynamic than static. Larg chunksize is faster than small size. However, they perform similarly in this project because
-because every thread is statisticly balanced and costs the same time.       
-P.S. For all performance analyse part, I delete IO operations in my program, which is slow and unparallelable.
+# 1.2.
+Serial:      
+![serial_gif](./fig/serial.gif)     
 
-# 3. Strong Scaling Study
+Mpi:      
+![mpi_gif](./fig/mpi_blocking.gif)   
+
+View animations in `./fig/`
+
+
+# 2. Strong Scaling Study
 ![strong scaling](./fig/strong_scaling.png)
-As shown in fig, speedup is less than ideal. In addition, performance in large matrix is better. The reason may be thread overheads. As parallel size becomes larger, the portion of overheads diminishes.
 
-# 4. Weak Scaling Study
+
+Mode | mpi_blocking | mpi_non_blocking | openmp
+-- | --- | --- | ---
+Time(ms) | 9159 | 9086 | 11563
+
+Non-blocking and blocking case performance almost the same in the case. All ranks are very balanced and sync function is small, so the advantage of blocking seldom shows here.
+
+# 3. Weak Scaling Study
 ![weak scaling](./fig/weak_scaling.png)
-Efficiency decreases when number of threads increases. Possible reason is that threads interacts with each other, e.g. some neighbors may being visited by other threads so current thread have to wait to acquire the lock.
+
+# 4. Hybrid mode
+Mode | 16 rank | 4 rank * 4 thread | 16 thread
+-- | --- | --- | ---
+Time(ms) | 72508 | 82907 | 207588
+
+When in openmp mode, program needs duplicate matrix for threads, which increases square with dimension(N). The overheads will increase largely.     
+However, in mpi case, the size of ghost cells only increases linearly.      
+So using MPI is a better choice.
