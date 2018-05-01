@@ -4,7 +4,7 @@
 #include <vector>
 #include <stdexcept>
 #include <chrono>
-#include <algorithm>
+#include <cmath>
 
 using namespace std;
 using namespace std::chrono;

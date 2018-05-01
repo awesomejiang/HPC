@@ -14,22 +14,11 @@ class Driver{
 public:
 	Driver(int argc, char** argv): argc{argc}, argv{argv},
 		xmin{-1.5}, xmax{1.5}, ymin{-1.0}, ymax{1.0},
-		Nx{2000}, Ny{2000}, mode{argv[1]}{
+		Nx{12000}, Ny{12000}, mode{argv[1]}{
 			if(argc == 3) //read dynamic chunks arg
 				chunks = atoi(argv[2]);
-			//start timing
-			//t1 = std::chrono::steady_clock::now();
 	}
-/*
-	~Driver(){
-		if(mype == 0){
-			auto t2 = std::chrono::steady_clock::now();
-			std::cout << "Running time: "
-				 << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
-				 << " ms" << std::endl;
-		}
-	}
-*/
+
 	void run(){
 		if(mode == "serial")
 			driver_serial();
@@ -47,7 +36,6 @@ private:
 	double xmin, xmax, ymin , ymax;
 	std::string mode;
 	int nprocs, mype, stat;
-	std::chrono::steady_clock::time_point t1;
 
 	void driver_serial(){
 		auto t1 = std::chrono::steady_clock::now();
@@ -118,7 +106,7 @@ private:
 		if(mype == 0){	//boss rank
 			dynamic_boss();
 			auto t2 = std::chrono::steady_clock::now();
-			std::cout << "Running time: "
+			std::cout << "Chunks/running time: " << chunks << "\t"
 				 << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
 				 << " ms" << std::endl;
 		}
