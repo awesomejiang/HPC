@@ -1,4 +1,4 @@
-# HPC project1
+# HPC project2
 Implementation of 2d-advection simulation(Distributed memory version).
 
 ## main code(C++)
