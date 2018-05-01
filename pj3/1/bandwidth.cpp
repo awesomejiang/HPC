@@ -4,10 +4,11 @@
 #include <vector>
 #include <stdexcept>
 #include <chrono>
+#include <algorithm>
 
 using namespace std;
 using namespace std::chrono;
-
+using std::pow;
 
 void test_bandwidth(int mype, string unit){
 	int size = unit=="KB"? 1024 : 1024*(unit=="MB"? 1024: 1024*1024);
@@ -31,9 +32,8 @@ void test_bandwidth(int mype, string unit){
 	if(mype == 0){
 		auto t2 = steady_clock::now();
 		duration<double> t = (t2-t1)/times;
-		cout << "Average bandwidth is: " << size*sizeof(int) <<" B." << endl;
-		cout << "Average bandwidth is: " << t.count() <<" s." << endl;
-		cout << "Average bandwidth is: " << 1/(size*sizeof(int)*t.count()) <<" GB/s." << endl;
+		auto data_size = size*sizeof(int)/pow(2, 30);
+		cout << "Average bandwidth is: " << data_size/t.count() <<" GB/s." << endl;
 	}
 }
 

@@ -14,13 +14,13 @@ class Driver{
 public:
 	Driver(int argc, char** argv): argc{argc}, argv{argv},
 		xmin{-1.5}, xmax{1.5}, ymin{-1.0}, ymax{1.0},
-		Nx{12000}, Ny{12000}, mode{argv[1]}{
+		Nx{2000}, Ny{2000}, mode{argv[1]}{
 			if(argc == 3) //read dynamic chunks arg
 				chunks = atoi(argv[2]);
 			//start timing
-			t1 = std::chrono::steady_clock::now();
+			//t1 = std::chrono::steady_clock::now();
 	}
-
+/*
 	~Driver(){
 		if(mype == 0){
 			auto t2 = std::chrono::steady_clock::now();
@@ -29,7 +29,7 @@ public:
 				 << " ms" << std::endl;
 		}
 	}
-
+*/
 	void run(){
 		if(mode == "serial")
 			driver_serial();
@@ -50,15 +50,24 @@ private:
 	std::chrono::steady_clock::time_point t1;
 
 	void driver_serial(){
+		auto t1 = std::chrono::steady_clock::now();
+
 		//create/clear outputfile
 		std::ofstream f("serial.out", std::ofstream::trunc);
 		f.close();
 
 		Julia j(xmin, xmax, ymin, ymax, Nx, Ny);
 		write_serial("serial.out", j.run(), 0);
+
+		auto t2 = std::chrono::steady_clock::now();
+		std::cout << "Running time: "
+			 << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
+			 << " ms" << std::endl;
 	}
 
 	void driver_static(){
+		auto t1 = std::chrono::steady_clock::now();
+
 		//create/clear outputfile
 		std::ofstream f("static.out", std::ofstream::trunc);
 		f.close();
@@ -79,11 +88,20 @@ private:
 		Julia j(xmin, xmax, ymin, ymax, Nx, Ny);
 		write_mpi("static.out", j.run(), Nx*Ny*mype*sizeof(int));
 
+		if(mype == 0){
+			auto t2 = std::chrono::steady_clock::now();
+			std::cout << "Running time: "
+				 << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
+				 << " ms" << std::endl;
+		}
+
 		//close mpi
 		MPI_Finalize();
 	}
 
 	void driver_dynamic(){
+		auto t1 = std::chrono::steady_clock::now();
+
 		//create/clear outputfile
 		std::ofstream f("dynamic.out", std::ofstream::trunc);
 		f.close();
@@ -97,8 +115,13 @@ private:
 			throw runtime_error("Cannot set mype.");
 
 		//test!
-		if(mype == 0)	//boss rank
+		if(mype == 0){	//boss rank
 			dynamic_boss();
+			auto t2 = std::chrono::steady_clock::now();
+			std::cout << "Running time: "
+				 << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
+				 << " ms" << std::endl;
+		}
 		else
 			dynamic_worker();
 
@@ -118,7 +141,7 @@ private:
 		//follow up works
 		for(auto i=0; i<chunks; ++i){
 			//recv res
-			auto size = Nx*Ny/chunks;
+			auto size = Nx/chunks*Ny;
 			recv_buf.resize(size+Nx%chunks*Ny);
 			MPI_Recv(recv_buf.data(), size+Nx%chunks*Ny, MPI_INT,
 				MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
@@ -133,9 +156,8 @@ private:
 				MPI_Send(&work_cnt, 1, MPI_INT, status.MPI_SOURCE, work_cnt+1, MPI_COMM_WORLD);
 				++work_cnt;
 			}
-			else{	//inform worker to end
+			else	//inform worker to end
 				MPI_Send(MPI_BOTTOM, 0, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
-			}
 		}
 	}
 
@@ -144,7 +166,7 @@ private:
 		MPI_Status status;
 		auto dx = (xmax-xmin)/chunks;
 
-		if(mype <= chunks){	//assigned for init work or not
+		if(mype < chunks){	//assigned for init work or not
 			MPI_Recv(&work_id, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 			while(status.MPI_TAG != 0){	//not a termination tag
 				auto new_xmin = xmin + dx*work_id;
@@ -159,14 +181,13 @@ private:
 	}
 
 	void write_serial(std::string file, vector<int>& vec, int seek_pos){
-		std::ofstream of(file, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
+		std::ofstream of(file, std::ios::in | std::ios::out | std::ios::binary);
 		of.seekp(seek_pos, std::ios::beg);
-		for(auto i=0; i<vec.size()/Ny; ++i){
-			for(auto j=0; j<Ny; ++j){
+		for(auto i=0; i<vec.size()/Ny; ++i)
+			for(auto j=0; j<Ny; ++j)
 				of.write(reinterpret_cast<char *>(&vec[i*Ny+j]), sizeof(int));
-			}
-		}
-		of.close();	
+
+		of.close();
 	}
 
 	void write_mpi(std::string file, vector<int>& vec, int seek_pos){

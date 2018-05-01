@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-node=2
 #SBATCH --cpus-per-task=1
 #SBATCH --exclusive
-#SBATCH --output=inter_bw_gb.out
+#SBATCH --output=intra_bw_gb.out
 
 module load openmpi/2.0.1+gcc-6.1
 
