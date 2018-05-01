@@ -19,9 +19,9 @@ public:
 			for(auto j=0; j<Ny; ++j)
 				values[i*Ny+j] = iteration(i, j);
 		auto t2 = std::chrono::steady_clock::now();
-		//std::cout << "Running time: "
-		//	 << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
-		//	 << " ms" << std::endl;
+		std::cout << "run: "
+			 << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
+			 << " ms" << std::endl;
 		return values;
 	}
 

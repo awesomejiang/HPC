@@ -172,33 +172,18 @@ private:
 	void write_serial(std::string file, vector<int>& vec, int seek_pos){
 		std::ofstream of(file, std::ios::in | std::ios::out | std::ios::binary);
 		of.seekp(seek_pos, std::ios::beg);
-		for(auto i=0; i<vec.size()/Ny; ++i)
-			for(auto j=0; j<Ny; ++j)
-				of.write(reinterpret_cast<char *>(&vec[i*Ny+j]), sizeof(int));
-
-		of.close();
+		of.write(reinterpret_cast<char *>(vec.data()), vec.size()*sizeof(int));
+		of.close();	
 	}
 
 	void write_mpi(std::string file, vector<int>& vec, int seek_pos){
 		MPI_File fh;
-		MPI_Offset offset;
+		MPI_Offset offset = seek_pos;
 		MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(file.c_str()),
 			MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &fh);
-
-		for(auto i=0; i<vec.size()/Ny; ++i){
-			for(auto j=0; j<Ny; ++j){
-				offset = seek_pos + sizeof(int)*(i*Ny+j);
-				MPI_File_seek(fh, offset, MPI_SEEK_SET);
-				MPI_File_write(fh, &vec[i*Ny+j], 1, MPI_INT, MPI_STATUS_IGNORE);
-			}
-		}
+		MPI_File_seek(fh, offset, MPI_SEEK_SET);
+		MPI_File_write(fh, vec.data(), vec.size(), MPI_INT, MPI_STATUS_IGNORE);
 
 		MPI_File_close(&fh);
 	}
 };
-
-
-
-
-
-
