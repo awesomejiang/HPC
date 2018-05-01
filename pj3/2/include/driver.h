@@ -70,11 +70,12 @@ private:
 
 		//test!
 		auto dx = (xmax-xmin)/nprocs;
+		auto seek_pos = Nx/nprocs*Ny*mype*sizeof(int);
 		xmin = xmin + dx*mype;
 		xmax = (mype != nprocs -1)? (xmin + dx): xmax; //care about last one
 		Nx = (mype != nprocs -1)? Nx/nprocs: Nx/nprocs+Nx%nprocs;
 		Julia j(xmin, xmax, ymin, ymax, Nx, Ny);
-		write_mpi("static.out", j.run(), Nx*Ny*mype*sizeof(int));
+		write_mpi("static.out", j.run(), seek_pos);
 
 		if(mype == 0){
 			auto t2 = std::chrono::steady_clock::now();

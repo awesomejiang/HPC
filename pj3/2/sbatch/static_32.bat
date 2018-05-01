@@ -1,9 +1,9 @@
 #! /bin/bash
 #SBATCH --time=00:05:00
 #SBATCH --partition=sandyb
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=32
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=16
+#SBATCH --cpus-per-task=1
 #SBATCH --exclusive
 #SBATCH --output=static_32.out
 

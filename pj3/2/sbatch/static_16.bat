@@ -2,8 +2,8 @@
 #SBATCH --time=00:05:00
 #SBATCH --partition=sandyb
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=16
+#SBATCH --ntasks-per-node=16
+#SBATCH --cpus-per-task=1
 #SBATCH --exclusive
 #SBATCH --output=static_16.out
 
