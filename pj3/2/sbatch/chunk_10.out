@@ -1,0 +1,11 @@
+slurmstepd-midway259: error: *** JOB 45585861 ON midway259 CANCELLED AT 2018-05-01T01:37:02 ***
+--------------------------------------------------------------------------
+ORTE has lost communication with its daemon located on node:
+
+  hostname:  midway260
+
+This is usually due to either a failure of the TCP network
+connection to the node, or possibly an internal failure of
+the daemon itself. We cannot recover from this failure, and
+therefore will terminate the job.
+--------------------------------------------------------------------------
