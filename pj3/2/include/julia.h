@@ -14,14 +14,9 @@ public:
 		values{vector<int>(Nx*Ny, 0)} {}
 
 	vector<int> &run(){
-		auto t1 = std::chrono::steady_clock::now();;
 		for(auto i=0; i<Nx; ++i)
 			for(auto j=0; j<Ny; ++j)
 				values[i*Ny+j] = iteration(i, j);
-		auto t2 = std::chrono::steady_clock::now();
-		std::cout << "run: "
-			 << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
-			 << " ms" << std::endl;
 		return values;
 	}
 
