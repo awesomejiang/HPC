@@ -3,7 +3,7 @@
 Implementation of ping-pong latency and bandwidth test program.
 
 ### main code(C++)
-Source code in src/main.        
+Source code in `1/`.        
 
 #### Compile
     make
@@ -21,11 +21,12 @@ gcc/6 or newer and mpic++ needed.
 1. mpi rank can only be 2.    
 2. UNIT should be `KB/MB/GB`.
 
+
 ## Part2
 Implementation of julia set(serial/mpi-staitc/mpi-dynamic).
 
 ### main code(C++)
-Source code in src/main and src/include.        
+Source code in `2/` and `2/include`.        
 
 #### Compile
     make
