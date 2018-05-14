@@ -1,5 +1,6 @@
 #include <iostream>
-#include <algorithm>
+#include <cmath>
+#include <numeric>
 #include "serial.h"
 
 Serial::Serial(long n): Poisson(n) {}

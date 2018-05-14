@@ -1,6 +1,7 @@
 #include <iostream>
 #include <mpi.h>
-#include <algorithm>
+#include <cmath>
+#include <numeric>
 #include <vector>
 #include "parallel.h"
 
