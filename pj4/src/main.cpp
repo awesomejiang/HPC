@@ -19,15 +19,16 @@ void run_serial(long n){
 	Serial s(n);
 	auto v = s.solve();
 
+	auto t2 = chrono::steady_clock::now();		
+	std::cout << "Serial Running time: "
+		 << chrono::duration_cast<chrono::milliseconds>(t2-t1).count()
+		 << " ms" << endl;
+
 	//write file
 	ofstream of("serial.out", ios::trunc | ios::in | ios::out | ios::binary);
 	of.write(reinterpret_cast<char *>(v.data()), v.size()*sizeof(double));
 	of.close();
 
-	auto t2 = chrono::steady_clock::now();		
-	std::cout << "Serial Running time: "
-		 << chrono::duration_cast<chrono::milliseconds>(t2-t1).count()
-		 << " ms" << endl;
 }
 
 void run_parallel(long n){
@@ -44,6 +45,13 @@ void run_parallel(long n){
 	Parallel p(n, nprocs, mype);
 	auto v = p.solve();
 
+	if(mype == 0){
+		auto t2 = chrono::steady_clock::now();		
+		std::cout << "Parallel Running time: "
+			 << chrono::duration_cast<chrono::milliseconds>(t2-t1).count()
+			 << " ms" << endl;
+	}
+
 	//write file
 	MPI_File fh;
 	MPI_Offset offset = mype*n/nprocs*n * sizeof(double);
@@ -53,12 +61,6 @@ void run_parallel(long n){
 	MPI_File_write(fh, v.data(), v.size(), MPI_DOUBLE, MPI_STATUS_IGNORE);
 	MPI_File_close(&fh);
 
-	if(mype == 0){
-		auto t2 = chrono::steady_clock::now();		
-		std::cout << "Parallel Running time: "
-			 << chrono::duration_cast<chrono::milliseconds>(t2-t1).count()
-			 << " ms" << endl;
-	}
 }
 
 int main(int argc, char** argv){

@@ -65,7 +65,8 @@ vec Serial::solve(){
 	// z
 	vec z;
 
-	for(long iter = 0; iter < n*n; ++iter){
+	long iter;
+	for(iter = 0; iter < n*n; ++iter){
 		//z = A * p;
 		z = matvec(p);
 		//alpha = rsold / (p' * z);
@@ -85,6 +86,6 @@ vec Serial::solve(){
 		rsold = rsnew;
 	}
 		
-	std::cout << "CG converged in " << n*n << " iterations." << std::endl;
+	std::cout << "CG converged in " << iter << " iterations." << std::endl;
 	return x;
 }

@@ -5,7 +5,7 @@ OBJS = $(patsubst include/%.h, obj/%.o, $(wildcard include/*.h))
 
 all : dir main
 
-$(OBJS): obj/%.o : include/%.cpp
+$(OBJS): obj/%.o : include/%.cpp include/%.h
 	$(CC) $(CFLAGS) -c -Iinclude -o $@ $<
 
 main: obj/main.o $(OBJS)
