@@ -1,5 +1,5 @@
 CC=nvcc
-CFLAGS=-g -std=c++11#-DPTH
+CFLAGS=-g -std=c++11 -O3#-DPTH
 
 OBJS = $(patsubst include/%.h, obj/%.o, $(wildcard include/*.h))
 

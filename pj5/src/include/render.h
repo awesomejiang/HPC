@@ -23,7 +23,8 @@ public:
 Vec random_serial();
 void render_serial(Scene const &p, int ndim, double *G, int rays);
 
-__device__ Vec random_cuda();
-__global__ void render_cuda(Scene p, int ndim, double *G);
+__device__ Vec random_cuda(curandState *state);
+__global__ void render_cuda(Scene *p, int ndim, double *G);
+__device__ double atomicAdd_d(double* address, double val);
 
 #endif

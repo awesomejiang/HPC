@@ -26,17 +26,10 @@ void run(int argc, char** argv){
 		cout << "Unrecognized mode!" << endl;
 		return ;
 	}
-
-	cudaEvent_t start_device, stop_device;
-	float time_device;
-	cudaEventCreate(&start_device);
-	cudaEventCreate(&stop_device);
-
+	
 	//int blocks, threads_per_block;
 	//blocks = MIN(rays/threads_per_block + 1, MAX_BLOCKS_PER_DIM);
 
-	cudaEventRecord(start_device, 0);
-	
 	//rendering...
 	cout << "Running " << mode << " Ray Tracing..." << endl;
 
@@ -44,6 +37,13 @@ void run(int argc, char** argv){
 	double *G = (double*)malloc(sizeof(double)*ndim*ndim);
 	for(auto i=0; i<ndim*ndim; ++i)
 		G[i] = 0;
+
+	cudaEvent_t start_device, stop_device;
+	float time_device;
+	cudaEventCreate(&start_device);
+	cudaEventCreate(&stop_device);
+
+	cudaEventRecord(start_device, 0);
 
 	if(mode == "serial"){
 		int rays = atoi(argv[3]);
@@ -53,13 +53,17 @@ void run(int argc, char** argv){
 		int b = atoi(argv[3]),
 			th = atoi(argv[4]);
 
+		Scene *dev_p;
 		double *dev_G;
+		cudaMalloc( (void **) &dev_p, sizeof(Scene));
 		cudaMalloc( (void **) &dev_G, sizeof(double)*ndim*ndim);
+		cudaMemcpy(dev_p, &p, sizeof(Scene), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_G, G, sizeof(double)*ndim*ndim, cudaMemcpyHostToDevice);
 
-	  	render_cuda<<<b, th>>>(p, ndim, dev_G);
-	  	
+	  	render_cuda<<<b, th>>>(dev_p, ndim, dev_G);
+
 		cudaMemcpy(G, dev_G, sizeof(double)*ndim*ndim, cudaMemcpyDeviceToHost);
+		cudaFree(dev_p); 
 		cudaFree(dev_G); 
 	}
 
@@ -68,6 +72,7 @@ void run(int argc, char** argv){
 	cudaEventElapsedTime(&time_device, start_device, stop_device);
 	cout << "Running time: "
 		 << time_device << " ms" << endl;
+
 	cudaEventDestroy(start_device);
 	cudaEventDestroy(stop_device);
 

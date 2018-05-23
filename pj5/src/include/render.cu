@@ -50,44 +50,55 @@ void render_serial(Scene const &p, int ndim, double *G, int rays){
 }
 
 
-__device__ Vec random_cuda(){
-	static curandState state;
-	static int flag = 0;
-	if(flag++ == 0){
-		int idx = blockIdx.x * blockDim.x + threadIdx.x;
-		curand_init(clock64(), idx, 0, &state);
-	}
-
-	auto phi = curand_uniform_double(&state)*2*M_PI;
+__device__ Vec random_cuda(curandState *state){
+	auto phi = curand_uniform_double(state)*2*M_PI;
 	auto sin_ph = std::sin(phi), cos_ph = std::cos(phi);
 
-	auto cos_th = (curand_uniform_double(&state)-.5)*2;
+	auto cos_th = (curand_uniform_double(state)-.5)*2;
 	auto sin_th = std::sqrt(1-cos_th*cos_th);
 
 	return Vec{sin_th*cos_ph, sin_th*sin_ph, cos_th};
 }
 
 
-__global__ void render_cuda(Scene p, int ndim, double *G){
+__global__ void render_cuda(Scene *p, int ndim, double *G){
 	Vec P, V, I;
 	double root, t;
+
+	curandState state;
+	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	curand_init(clock64()+idx, 0, 0, &state);
 	bool flag = true;
 	while(flag){
-		V = random_cuda();
-		P = (p.W.y/V.y)*V;
-		if((-p.W.x<P.x || P.x>p.W.x) && (-p.W.z<P.z || P.z>p.W.z)){	
+		V = random_cuda(&state);
+		P = (p->W.y/V.y)*V;
+		if((-p->W.x<P.x || P.x>p->W.x) && (-p->W.z<P.z || P.z>p->W.z)){	
 			//if has root
-			root = V*p.C;
+			root = V*p->C;
 			root *= root;
-			root += p.rad*p.rad - p.C*p.C;
+			root += p->rad*p->rad - p->C*p->C;
 			if(root>0)
 				flag = false;
 		}
 	}
-	t = V*p.C - sqrt(root);
+	t = V*p->C - sqrt(root);
 	I = t*V;
 
-	int g_x = (P.x+p.W.x)/(p.W.x*2)*ndim,
-		g_z = (P.z+p.W.z)/(p.W.z*2)*ndim;
-	G[g_x*ndim + g_z] += max(0.0, (I-p.C).norm()*(p.L-I).norm());
+	int g_x = (P.x+p->W.x)/(p->W.x*2)*ndim,
+		g_z = (P.z+p->W.z)/(p->W.z*2)*ndim;
+	atomicAdd_d(G + g_x*ndim + g_z, max(0.0, (I-p->C).norm()*(p->L-I).norm()));
+}
+
+__device__ double atomicAdd_d(double* address, double val)
+{
+    unsigned long long int* address_as_ull =
+                                          (unsigned long long int*)address;
+    unsigned long long int old = *address_as_ull, assumed;
+    do {
+        assumed = old;
+        old = atomicCAS(address_as_ull, assumed, 
+                        __double_as_longlong(val + 
+                        __longlong_as_double(assumed)));
+    } while (assumed != old);
+    return __longlong_as_double(old);
 }
