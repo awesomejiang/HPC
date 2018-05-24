@@ -48,14 +48,6 @@ Vec random_serial(){
 	return Vec{sin_th*cos_ph, sin_th*sin_ph, cos_th};
 }
 
-
-void print_error(){
-	std::string error = cudaGetErrorString(cudaPeekAtLastError());
-	printf("1:%s\n", error.c_str());
-	error = cudaGetErrorString(cudaThreadSynchronize());
-	printf("2:%s\n", error.c_str());
-}
-
 void render_cuda(Scene const &p, int ndim, double *G, dim3 grids, dim3 blocks){
 	Scene *dev_p;
 	double *dev_G;
@@ -66,7 +58,6 @@ void render_cuda(Scene const &p, int ndim, double *G, dim3 grids, dim3 blocks){
 	cudaMemcpy(dev_G, G, sizeof(double)*ndim*ndim, cudaMemcpyHostToDevice);
 
   	render_thread<<<grids, blocks>>>(dev_p, ndim, dev_G);
-	print_error();
 
 	cudaMemcpy(G, dev_G, sizeof(double)*ndim*ndim, cudaMemcpyDeviceToHost);
 

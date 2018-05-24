@@ -44,6 +44,7 @@ void run(int argc, char** argv){
 	if(mode == "serial"){
 		int rays = atoi(argv[3]);
   		render_serial(p, ndim, G, rays);
+  		cout << "Rays: " << rays << endl;
 	}
 	else if(mode == "cuda"){
 		int b = atoi(argv[3]),
@@ -54,12 +55,13 @@ void run(int argc, char** argv){
 		dim3 grids(min(b, max_b), (b+max_b-1)/max_b, 1),
 			 blocks(th, 1, 1);
 		render_cuda(p, ndim, G, grids, blocks);
+		cout << "Rays: " << b*th << endl;
 	}
 
 	cudaEventRecord(stop_device, 0);
 	cudaEventSynchronize(stop_device);
 	cudaEventElapsedTime(&time_device, start_device, stop_device);
-	cout << "Running time: "
+	cout << "Rendering time: "
 		 << time_device << " ms" << endl;
 
 	cudaEventDestroy(start_device);
