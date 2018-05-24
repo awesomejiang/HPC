@@ -1,14 +1,20 @@
 #! /bin/bash
 #SBATCH --time=00:30:00
-#SBATCH --partition=sandyb
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=1
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:1
 #SBATCH --exclusive
-#SBATCH --output=serial_sbatch.out
+#SBATCH --output=sbatch.out
 
 module load cuda/8.0
 module load gcc/4.8
+
+../main cuda 1000 4 250
+../main cuda 1000 40 250
+../main cuda 1000 400 250
+../main cuda 1000 4000 250
+../main cuda 1000 40000 250
+../main cuda 1000 400000 250
+../main cuda 1000 4000000 250
 
 ../main serial 1000 1000
 ../main serial 1000 10000
