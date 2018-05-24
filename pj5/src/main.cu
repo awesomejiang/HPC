@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
-#include <stdio.h>
 #include <cuda.h>
 #include "render.h"
 
@@ -17,7 +16,6 @@ void write(string filename, double* G, int len){
 	of.close();
 }
 
-
 void run(int argc, char** argv){
 	//read common args
 	string mode = string{argv[1]};
@@ -26,9 +24,6 @@ void run(int argc, char** argv){
 		cout << "Unrecognized mode!" << endl;
 		return ;
 	}
-	
-	//int blocks, threads_per_block;
-	//blocks = MIN(rays/threads_per_block + 1, MAX_BLOCKS_PER_DIM);
 
 	//rendering...
 	cout << "Running " << mode << " Ray Tracing..." << endl;
@@ -53,18 +48,7 @@ void run(int argc, char** argv){
 		int b = atoi(argv[3]),
 			th = atoi(argv[4]);
 
-		Scene *dev_p;
-		double *dev_G;
-		cudaMalloc( (void **) &dev_p, sizeof(Scene));
-		cudaMalloc( (void **) &dev_G, sizeof(double)*ndim*ndim);
-		cudaMemcpy(dev_p, &p, sizeof(Scene), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_G, G, sizeof(double)*ndim*ndim, cudaMemcpyHostToDevice);
-
-	  	render_cuda<<<b, th>>>(dev_p, ndim, dev_G);
-
-		cudaMemcpy(G, dev_G, sizeof(double)*ndim*ndim, cudaMemcpyDeviceToHost);
-		cudaFree(dev_p); 
-		cudaFree(dev_G); 
+		render_cuda(p, ndim, G, b, th);
 	}
 
 	cudaEventRecord(stop_device, 0);

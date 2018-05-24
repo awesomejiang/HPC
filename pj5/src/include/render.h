@@ -6,6 +6,7 @@
 #include <random>
 #include <cmath>
 #include <cuda.h>
+#include <string>
 
 #include "vec3.h"
 
@@ -20,11 +21,13 @@ public:
 	double rad;
 };
 
-Vec random_serial();
 void render_serial(Scene const &p, int ndim, double *G, int rays);
+Vec random_serial();
 
-__device__ Vec random_cuda(curandState *state);
-__global__ void render_cuda(Scene *p, int ndim, double *G);
+void render_cuda(Scene const &p, int ndim, double *G, int blocks, int threads);
+__device__ Vec random_generator(curandState *state);
+__global__ void random_cuda(Scene *p, int ndim, Vec *rands);
+__global__ void render_thread(Scene *p, int ndim, Vec *rands, double *G);
 __device__ double atomicAdd_d(double* address, double val);
 
 #endif
