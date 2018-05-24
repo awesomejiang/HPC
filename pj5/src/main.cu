@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
+#include <cassert>
 #include <cuda.h>
 #include "render.h"
 
@@ -47,8 +48,12 @@ void run(int argc, char** argv){
 	else if(mode == "cuda"){
 		int b = atoi(argv[3]),
 			th = atoi(argv[4]);
+		assert(th<=1024);
 
-		render_cuda(p, ndim, G, b, th);
+		int max_b = 65535;
+		dim3 grids(min(b, max_b), (b+max_b-1)/max_b, 1),
+			 blocks(th, 1, 1);
+		render_cuda(p, ndim, G, grids, blocks);
 	}
 
 	cudaEventRecord(stop_device, 0);

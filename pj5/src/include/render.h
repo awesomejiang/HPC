@@ -24,10 +24,9 @@ public:
 void render_serial(Scene const &p, int ndim, double *G, int rays);
 Vec random_serial();
 
-void render_cuda(Scene const &p, int ndim, double *G, int blocks, int threads);
-__device__ Vec random_generator(curandState *state);
-__global__ void random_cuda(Scene *p, int ndim, Vec *rands);
-__global__ void render_thread(Scene *p, int ndim, Vec *rands, double *G);
+void render_cuda(Scene const &p, int ndim, double *G, dim3 grids, dim3 blocks);
+__device__ Vec random_cuda(curandState *state);
+__global__ void render_thread(Scene *p, int ndim, double *G);
 __device__ double atomicAdd_d(double* address, double val);
 
 #endif

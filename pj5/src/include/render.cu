@@ -56,39 +56,25 @@ void print_error(){
 	printf("2:%s\n", error.c_str());
 }
 
-void memory_usage(){
-    size_t free_byte ;
-	size_t total_byte ;
-	cudaMemGetInfo(&free_byte, &total_byte);
-	printf("f:%lu\n", free_byte);
-	printf("t:%lu\n", total_byte);
-}
-
-void render_cuda(Scene const &p, int ndim, double *G, int blocks, int threads){
+void render_cuda(Scene const &p, int ndim, double *G, dim3 grids, dim3 blocks){
 	Scene *dev_p;
 	double *dev_G;
-	Vec *dev_rands;
 	cudaMalloc( (void **) &dev_p, sizeof(Scene));
 	cudaMalloc( (void **) &dev_G, sizeof(double)*ndim*ndim);
-	cudaMalloc( (void **) &dev_rands, sizeof(Vec)*blocks*threads);
 
 	cudaMemcpy(dev_p, &p, sizeof(Scene), cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_G, G, sizeof(double)*ndim*ndim, cudaMemcpyHostToDevice);
 
-	memory_usage();
-	random_cuda<<<blocks, threads>>>(dev_p, ndim, dev_rands);
+  	render_thread<<<grids, blocks>>>(dev_p, ndim, dev_G);
 	print_error();
-
-  	render_thread<<<blocks, threads>>>(dev_p, ndim, dev_rands, dev_G);
 
 	cudaMemcpy(G, dev_G, sizeof(double)*ndim*ndim, cudaMemcpyDeviceToHost);
 
 	cudaFree(dev_p);
 	cudaFree(dev_G);
-	cudaFree(dev_rands);
 }
 
-__device__ Vec random_generator(curandState *state){
+__device__ Vec random_cuda(curandState *state){
 	auto phi = curand_uniform_double(state)*2*M_PI;
 	auto sin_ph = std::sin(phi), cos_ph = std::cos(phi);
 
@@ -98,8 +84,9 @@ __device__ Vec random_generator(curandState *state){
 	return Vec{sin_th*cos_ph, sin_th*sin_ph, cos_th};
 }
 
-__global__ void random_cuda(Scene *p, int ndim, Vec *rands){
-	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+__global__ void render_thread(Scene *p, int ndim, double *G){
+	//int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	int idx = (blockIdx.y*gridDim.x+blockIdx.x)*blockDim.x + threadIdx.x;
 
 	curandState state;
 	curand_init(clock64()+idx, 0, 0, &state);
@@ -108,7 +95,7 @@ __global__ void random_cuda(Scene *p, int ndim, Vec *rands){
 	double root;
 	bool flag = true;
 	while(flag){
-		V = random_generator(&state);
+		V = random_cuda(&state);
 		P = (p->W.y/V.y)*V;
 		if((-p->W.x<P.x || P.x>p->W.x) && (-p->W.z<P.z || P.z>p->W.z)){	
 			//if has root
@@ -119,20 +106,9 @@ __global__ void random_cuda(Scene *p, int ndim, Vec *rands){
 				flag = false;
 		}
 	}
-	rands[idx] = V;
-}
 
-__global__ void render_thread(Scene *p, int ndim, Vec *rands, double *G){
-	int idx = blockIdx.x*blockDim.x + threadIdx.x;
-
-	Vec V = rands[idx], P = (p->W.y/V.y)*V, I;
-	double root, t;
-
-	root = V*p->C;
-	root *= root;
-	root += p->rad*p->rad - p->C*p->C;
-	t = V*p->C - sqrt(root);
-	I = t*V;
+	double t = V*p->C - sqrt(root);
+	Vec I = t*V;
 
 	int g_x = (P.x+p->W.x)/(p->W.x*2)*ndim,
 		g_z = (P.z+p->W.z)/(p->W.z*2)*ndim;
