@@ -18,11 +18,7 @@ public:
 		z += a.z;
 		return *this;
 	}
-/*
-	Vec3<T> &norm(){
-		return *this = *this * rsqrt(x*x + y*y + z*z);
-	}
-*/
+
 	T x,y,z;
 };
 

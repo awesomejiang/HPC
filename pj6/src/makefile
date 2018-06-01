@@ -1,16 +1,50 @@
-CC=g++
-CFLAGS=-std=gnu++98#-DPTH
+#=========================================================
+# User Options
+#=========================================================
+COMPILER = gnu
+MPI		 = yes
+OPENMP	 = no
+OPTIMIZE = yes
 
+#=========================================================
+# Set flags
+#=========================================================
 LIBS = $(patsubst include/%.h, lib/lib%.so, $(wildcard include/*.h))
-TESTS = $(patsubst %.cpp, %, $(wildcard *.cpp))
+MAIN = $(patsubst %.cpp, %, $(wildcard *.cpp))
+
+# Regular g++ compiler
+ifeq ($(COMPILER),gnu)
+  CC = g++
+endif
+
+CFLAGS=-std=gnu++98
+
+# MPI compiler
+ifeq ($(MPI),yes)
+  CC = mpicxx
+  CFLAGS += -DMPI_ON
+endif
+
+# OpenMP
+ifeq ($(OPENMP),yes)
+  CFLAGS += -fopenmp -DOPENMP_ON
+endif
+
+# Optimization Flags
+ifeq ($(OPTIMIZE),yes)
+  CFLAGS += -O3
+endif
 
 
-all : $(TESTS)
+#=========================================================
+# Building rules
+#=========================================================
+all : $(MAIN)
 
 $(LIBS): lib/lib%.so : include/%.cpp dir
 	$(CC) $(CFLAGS) -fPIC -shared -Iinclude -o $@ $<
 
-$(TESTS): %: obj/%.o $(LIBS)
+$(MAIN): %: obj/%.o $(LIBS)
 	$(CC) $(CFLAGS) -Wl,-rpath lib -Iinclude $< -o $@ -Llib -lnbody -lvec3
 	
 obj/%.o: %.cpp dir
@@ -20,4 +54,4 @@ dir:
 	mkdir -p lib obj
 
 clean :
-	rm -rf $(TESTS) lib obj
+	rm -rf $(MAIN) lib obj
