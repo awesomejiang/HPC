@@ -6,6 +6,7 @@
 #include <ctime>
 #include <cstdio>
 #include <vector>
+#include <string.h>
 #include "vec3.h"
 
 #ifdef MPI_ON
