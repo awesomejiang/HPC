@@ -3,7 +3,7 @@
 #=========================================================
 COMPILER = gnu
 MPI		 = yes
-OPENMP	 = no
+OPENMP	 = yes
 OPTIMIZE = yes
 
 #=========================================================
@@ -17,7 +17,7 @@ ifeq ($(COMPILER),gnu)
   CC = g++
 endif
 
-CFLAGS=-std=gnu++98
+CFLAGS=-std=gnu++98 -g
 
 # MPI compiler
 ifeq ($(MPI),yes)
@@ -51,7 +51,7 @@ obj/%.o: %.cpp dir
 	$(CC) $(CFLAGS) -c -Iinclude -o $@ $<
 
 dir:
-	mkdir -p lib obj
+	mkdir -p lib obj dat
 
 clean :
 	rm -rf $(MAIN) lib obj

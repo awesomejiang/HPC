@@ -69,6 +69,7 @@ void System::init_bodies(){
 }
 
 #ifdef MPI_ON
+
 void System::run_simulation(double dt, int n_iters, char *fname){
 	// Open File
 	MPI_File fh;

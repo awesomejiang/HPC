@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <fstream>
 #include "nbody.h"
+#include <string>
 
 #ifdef MPI_ON
 
@@ -32,7 +33,7 @@ void usage(char* program){
 // function to get system arguments from command line
 void get_args(int argc, char** argv, int* n, double* dt, int *iter, char** fname, int* thread){	
     char ch;
-    while (( ch = getopt(argc, argv, "n:d:i:o:t")) != -1){
+    while (( ch = getopt(argc, argv, "n:d:i:o:t:h")) != -1){
         switch (ch){
         case 'n':
             *n = atoi(optarg);break;
@@ -56,9 +57,10 @@ int main(int argc, char **argv){
 	int n = 128;
 	double dt = 0.2;
 	int n_iters = 1000;
-	char *fname = (char*)"dat/nbody.dat";
+	char *fname = (char*)"nbody.dat";
 	int thread = 8;
 	get_args(argc, argv, &n, &dt, &n_iters, &fname, &thread);
+    fname = (char*)(std::string("dat/") + std::string(fname)).c_str();
 
 	#ifdef OPENMP_ON
 
@@ -72,7 +74,7 @@ int main(int argc, char **argv){
     std::ofstream of(fname);
     of.close();
 	MPI_Init(&argc, &argv);
-	
+
 	#endif
 
 	System s(n);
