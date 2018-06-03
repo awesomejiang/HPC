@@ -2,7 +2,7 @@
 # User Options
 #=========================================================
 COMPILER = gnu
-MPI		 = yes
+MPI		 = no
 OPENMP	 = yes
 OPTIMIZE = yes
 
