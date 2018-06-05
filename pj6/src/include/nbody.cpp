@@ -93,6 +93,8 @@ void System::run_simulation(double dt, int n_iters, char *fname){
 		if(mype == 0)
 			printf("iteration: %d\n", i);
 
+		#if OUTPUT_ON
+
 		for(vbody_iter iter = bodies.begin(); iter != bodies.end(); ++iter){
 			char tmp[512];
 			sprintf(tmp, "%+.*le %+.*le %+.*le\n", 10, iter->r.x, 10, iter->r.y, 10, iter->r.z);
@@ -100,6 +102,8 @@ void System::run_simulation(double dt, int n_iters, char *fname){
 			MPI_File_seek(fh, offset, MPI_SEEK_SET);
 			MPI_File_write(fh, tmp, strlen(tmp), MPI_CHAR, MPI_STATUS_IGNORE);
 		}
+
+		#endif 
 
 		// Compute new forces & velocities for all particles
 		// Compute forces between bodies and in_buffers
@@ -150,9 +154,13 @@ void System::run_simulation(double dt, int n_iters, char *fname){
 	{
 		printf("iteration: %d\n", i);
 
+		#if OUTPUT_ON
+
 		// Output body positions to file
 		for(vbody_iter iter = bodies.begin(); iter != bodies.end(); ++iter)
 			fprintf(datafile, "%+.*le %+.*le %+.*le\n", 10, iter->r.x, 10, iter->r.y, 10, iter->r.z);
+
+		#endif
 
 		// Compute new forces & velocities for all particles
 		compute_forces(dt);

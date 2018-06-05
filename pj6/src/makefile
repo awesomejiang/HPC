@@ -4,6 +4,7 @@
 COMPILER = gnu
 MPI		 = yes
 OPENMP	 = yes
+OUTPUT	 = yes
 OPTIMIZE = yes
 
 #=========================================================
@@ -30,6 +31,11 @@ ifeq ($(OPENMP),yes)
   CFLAGS += -fopenmp -DOPENMP_ON
 endif
 
+# Output or not?
+ifeq ($(OUTPUT),yes)
+  CFLAGS += -DOUTPUT_ON
+endif
+
 # Optimization Flags
 ifeq ($(OPTIMIZE),yes)
   CFLAGS += -O3
@@ -45,7 +51,7 @@ $(LIBS): lib/lib%.so : include/%.cpp dir
 	$(CC) $(CFLAGS) -fPIC -shared -Iinclude -o $@ $<
 
 $(MAIN): %: obj/%.o $(LIBS)
-	$(CC) $(CFLAGS) -Wl,-rpath lib -Iinclude $< -o $@ -Llib -lnbody -lvec3
+	$(CC) $(CFLAGS) -dynamic -Wl,-rpath lib -Iinclude $< -o $@ -Llib -lnbody -lvec3
 	
 obj/%.o: %.cpp dir
 	$(CC) $(CFLAGS) -c -Iinclude -o $@ $<
