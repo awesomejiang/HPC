@@ -2,11 +2,11 @@
 
 typedef std::vector<Body>::iterator vbody_iter;
 
-System::System(): n_bodies(100) {
+System::System(): n_bodies(100), G(6.67259e-3), softening(1.0e-5), dt(2.0e-1) {
 	init_system();
 }
 
-System::System(int n_bodies): n_bodies(n_bodies) {
+System::System(int n_bodies): n_bodies(n_bodies), G(6.67259e-3), softening(1.0e-5), dt(2.0e-1) {
 	init_system();
 }
 
@@ -70,7 +70,7 @@ void System::init_bodies(){
 
 #ifdef MPI_ON
 
-void System::run_simulation(double dt, int n_iters, char *fname){
+void System::run_simulation(int n_iters, char *fname){
 	// Open File
 	MPI_File fh;
 	MPI_Offset offset;
@@ -95,14 +95,15 @@ void System::run_simulation(double dt, int n_iters, char *fname){
 
 		#if OUTPUT_ON
 
+		std::string str("");
 		for(vbody_iter iter = bodies.begin(); iter != bodies.end(); ++iter){
-			char tmp[512];
+			char tmp[128];
 			sprintf(tmp, "%+.*le %+.*le %+.*le\n", 10, iter->r.x, 10, iter->r.y, 10, iter->r.z);
-			offset = strlen(tmp)*(1+n_bodies*(nprocs*i+mype)+iter-bodies.begin());
-			MPI_File_seek(fh, offset, MPI_SEEK_SET);
-			MPI_File_write(fh, tmp, strlen(tmp), MPI_CHAR, MPI_STATUS_IGNORE);
+			str.append(tmp);
 		}
-
+		offset = str.size()/n_bodies*(1+n_bodies*(nprocs*i+mype));
+		MPI_File_seek(fh, offset, MPI_SEEK_SET);
+		MPI_File_write(fh, str.c_str(), str.size(), MPI_CHAR, MPI_STATUS_IGNORE);
 		#endif 
 
 		// Compute new forces & velocities for all particles
@@ -110,7 +111,7 @@ void System::run_simulation(double dt, int n_iters, char *fname){
 		// then "rotate" buffer to neighbors
 		in_buffer = bodies;
 		for(int rank=0; rank<nprocs; ++rank){
-			compute_forces(dt);
+			compute_forces();
 			out_buffer = in_buffer;
 			MPI_Isend(&out_buffer.front(), n_bodies, MPI_BODY, (mype+nprocs-1)%nprocs, 0, MPI_COMM_WORLD, &r);
 			MPI_Irecv(&in_buffer.front(), n_bodies, MPI_BODY, (mype+1)%nprocs, 0, MPI_COMM_WORLD, &r);
@@ -142,7 +143,7 @@ void System::run_simulation(double dt, int n_iters, char *fname){
 
 #else
 
-void System::run_simulation(double dt, int n_iters, char *fname){
+void System::run_simulation(int n_iters, char *fname){
 	// Open File and Write Header Info
 	FILE * datafile = fopen(fname,"w");
 	fprintf(datafile, "%+.*le %+.*le %+.*le\n", 10, (double)n_bodies, 10, (double) n_iters, 10, 0.0);
@@ -163,7 +164,7 @@ void System::run_simulation(double dt, int n_iters, char *fname){
 		#endif
 
 		// Compute new forces & velocities for all particles
-		compute_forces(dt);
+		compute_forces();
 
 		// Update positions of all particles
 		for(vbody_iter iter = bodies.begin(); iter != bodies.end(); ++iter)
@@ -189,9 +190,7 @@ void System::run_simulation(double dt, int n_iters, char *fname){
 
 #endif
 
-void System::compute_forces(double dt){
-	double G = 6.67259e-3;
-	double softening = 1.0e-5;
+void System::compute_forces(){
 
 	#ifdef OPENMP_ON
 
@@ -276,7 +275,6 @@ void System::uniform_random(){
 
 // A interesting case, work for 3 bodies only
 void System::three_body(){
-	double G = 6.67259e-3;
 	double m = 10;
 	bodies.push_back(
 		Body(Vec(0, sqrt(3)/3, 0),
@@ -330,11 +328,22 @@ void System::galaxy(){
 	if(flag == 0)
 		srand(42);
 
-	double G = 6.67259e-3, M = 1, m  = 10e-6;
+	double M = 1, m  = 10e-6;
 
 	for(int i=0; i<n_bodies; ++i){
 		double phi = double(rand()/(double)RAND_MAX)*2*M_PI;
 		double radius = double(rand()/(double)RAND_MAX);
+
+		#if MPI_ON
+
+		if(n_bodies*flag + i < n_bodies*nprocs*0.7) radius = phi/10;
+
+		#else
+
+		if(i < n_bodies*0.7) radius = phi/10;
+
+		#endif
+
 		double velocity = sqrt(G*M/radius);
 		bodies[i] = Body(
 						Vec(radius*cos(phi), radius*sin(phi), 0),
@@ -342,11 +351,9 @@ void System::galaxy(){
 						m
 					);
 	}
-	if(flag == 0){
 	// set one and only one HUGE star at center.
+	if(flag++ == 0)
 		bodies[0] = Body(Vec(0, 0, 0), Vec(0, 0, 0), M);
-		++flag;
-	}
 }
 
 double get_time(){

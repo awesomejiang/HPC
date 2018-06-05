@@ -37,11 +37,12 @@ public:
 	System();
 	System(int n_bodies);
 
-	void run_simulation(double dt, int n_iters, char *fname);
+	void run_simulation(int n_iters, char *fname);
 
 private:
 	int n_bodies;
 	std::vector<Body> bodies;
+	double G, softening, dt;
 
 	#ifdef MPI_ON
 
@@ -53,7 +54,7 @@ private:
 
 	void init_system();
 	void init_bodies();
-	void compute_forces(double dt);
+	void compute_forces();
 
 	/* init conditions */
 	void uniform_random();

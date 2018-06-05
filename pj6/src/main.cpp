@@ -21,14 +21,13 @@ int main(int argc, char **argv){
 
 	assert(argc == 5);
 	int n = atoi(argv[1]);
-	double dt = atof(argv[2]);
-	int n_iters = atoi(argv[3]);
-	int thread = atoi(argv[4]);
-	char *fname = (char*)"dat/nbody.dat";	
+	int n_iters = atoi(argv[2]);
+	int thread = atoi(argv[3]);
+	char *fname = argv[4];	
 /*
 	int n = 102400;
 	double dt = 0.2;
-	int n_iters = 10;
+	int n_iters = 10;m
 	int thread = 1;
 	char *fname = (char*)"dat/nbody.dat";
 */
@@ -53,7 +52,7 @@ int main(int argc, char **argv){
 	#endif
 
 	System s(n);
-	s.run_simulation(dt, n_iters, fname);
+	s.run_simulation(n_iters, fname);
 
 	#ifdef MPI_ON
 
