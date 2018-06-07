@@ -8,6 +8,7 @@
 #include <vector>
 #include <string.h>
 #include "vec3.h"
+#include <string>
 
 #ifdef MPI_ON
 

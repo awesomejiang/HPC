@@ -103,7 +103,7 @@ void System::run_simulation(int n_iters, char *fname){
 		}
 		offset = str.size()/n_bodies*(1+n_bodies*(nprocs*i+mype));
 		MPI_File_seek(fh, offset, MPI_SEEK_SET);
-		MPI_File_write(fh, str.c_str(), str.size(), MPI_CHAR, MPI_STATUS_IGNORE);
+		MPI_File_write(fh, (void*)str.c_str(), str.size(), MPI_CHAR, MPI_STATUS_IGNORE);
 		#endif 
 
 		// Compute new forces & velocities for all particles
