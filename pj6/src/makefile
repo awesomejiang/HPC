@@ -4,7 +4,7 @@
 COMPILER = gnu
 MPI		 = yes
 OPENMP	 = yes
-OUTPUT	 = yes
+OUTPUT	 = no
 OPTIMIZE = yes
 
 #=========================================================
